@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusFlow</title>
+  <meta name="description" content="FocusFlow — Clock, Pomodoro, Tasks, and Music for Deep Work" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+  <div class="ambient-bg"></div>
+  <div id="top-edge-detector"></div>
+
+  <!-- ══ CUSTOM TITLEBAR ══ -->
+  <div class="titlebar">
+    <div class="titlebar-drag"></div>
+    <div class="titlebar-controls">
+      <button class="tb-btn" id="tb-min" title="Minimize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button class="tb-btn" id="tb-max" title="Maximize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+      </button>
+      <button class="tb-btn tb-close" id="tb-close" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ══ MUSIC PLAYER (left-edge hover) ══ -->
+  <div class="music-trigger" id="musicTrigger"></div>
+  <aside class="music-panel" id="musicPanel" aria-label="Music player">
+    <div class="music-panel-header">
+      <!-- Music icon -->
+      <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+      </svg>
+      <span class="mp-title" data-i18n="music">SoundCloud</span>
+      <div class="mp-wave-icon" id="mpWaveIcon">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="music-search-row">
+      <div class="music-search-wrap">
+        <svg class="music-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="musicSearch" class="music-search" placeholder="Search (Enter) or paste link…" data-i18n-placeholder="searchTrack" autocomplete="off" />
+      </div>
+    </div>
+
+    <!-- Now Playing -->
+    <div class="now-playing" id="nowPlaying">
+      <div class="np-art" id="npArt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <div class="np-info">
+        <div class="np-title" id="npTitle" data-i18n="noTrack">No track selected</div>
+        <div class="np-artist" id="npArtist" data-i18n="browseTracks">Browse tracks below</div>
+      </div>
+    </div>
+
+    <!-- Player Controls -->
+    <div class="music-controls">
+      <button class="mc-btn" id="btnMPrev" title="Previous">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="2" height="16"/></svg>
+      </button>
+      <button class="mc-btn mc-play" id="btnMPlay" title="Play/Pause">
+        <svg id="ico-mplay" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+        <svg id="ico-mpause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="mc-btn" id="btnMNext" title="Next">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="17" y="4" width="2" height="16"/></svg>
+      </button>
+      <button class="mc-btn mc-loop" id="btnMLoop" title="Loop Track">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div class="music-progress">
+      <span class="mp-time" id="mpTimeCur">0:00</span>
+      <div class="mp-bar-wrap" id="mpBarWrap">
+        <div class="mp-bar" id="mpBar"></div>
+      </div>
+      <span class="mp-time" id="mpTimeDur">0:00</span>
+    </div>
+
+    <!-- Volume -->
+    <div class="music-volume">
+      <svg class="mv-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+      <input type="range" id="mpVolume" min="0" max="100" value="60" class="mv-range" />
+    </div>
+
+    <!-- Track List -->
+    <div class="music-list-header">
+      <span data-i18n="tracks">Tracks</span>
+      <span class="ml-count" id="mlCount">0</span>
+    </div>
+    <ul class="music-list" id="musicList" role="list"></ul>
+  </aside>
+
+  <!-- ══ TASK PANEL (right-edge hover) ══ -->
+  <div class="task-trigger" id="taskTrigger"></div>
+  <aside class="task-panel" id="taskPanel" aria-label="Task list">
+    <div class="task-panel-header">
+      <!-- Checklist icon -->
+      <svg class="tp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      <div class="tp-header-info">
+        <span class="tp-title" data-i18n="tasks">Tasks</span>
+        <span class="tp-count" id="tpCount">0/0</span>
+      </div>
+      <button class="tp-clear" id="btnClearDone" title="Clear completed" aria-label="Clear Completed">
+        <!-- Trash icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Progress Bar -->
+    <div class="tp-progress-bg"><div class="tp-progress-fill" id="tpProgress"></div></div>
+
+    <!-- Add task input -->
+    <div class="task-input-row">
+      <input type="text" id="taskInput" class="task-input" placeholder="Add a task…" data-i18n-placeholder="addTask" maxlength="80" autocomplete="off" />
+      <button class="task-add-btn" id="btnAddTask" title="Add task">
+        <!-- Plus icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="task-time-row">
+      <button class="btn-now" id="btnTaskNow" data-i18n="now" title="Set to Current Time">Now</button>
+      <input type="time" id="taskStart" class="task-time-input" title="Start Time (Optional)" />
+      <span class="task-time-sep">-</span>
+      <input type="time" id="taskEnd" class="task-time-input" title="End Time (Optional)" />
+    </div>
+
+    <!-- Task list -->
+    <ul class="task-list" id="taskList" role="list"></ul>
+
+    <!-- Empty state -->
+    <div class="task-empty" id="taskEmpty">
+      <!-- Empty box icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      <p data-i18n="noTasks">No tasks yet</p>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN STAGE ══ -->
+  <main class="stage" id="stage">
+
+    <!-- StandBy Display -->
+    <div class="standby-container" id="standbyContainer">
+      <!-- Huge Clock -->
+      <div class="sc-giant" id="simpleClock">
+        <span class="sc-group" id="scH">00</span><span class="sc-colon" id="scColonHM">:</span><span class="sc-group" id="scM">00</span><span class="sc-colon" id="scColonMS" style="display:none;">:</span><span class="sc-group" id="scS" style="display:none;">00</span>
+      </div>
+      <!-- Widget Stack -->
+      <div class="sc-widget-stack" id="scWidgetStack">
+        <!-- Date Widget -->
+        <div class="sc-widget" id="scDateWidget">
+          <div class="sc-wdow" id="scDay">MON</div>
+          <div class="sc-wdate" id="scDate">6</div>
+        </div>
+        <!-- Real Time Clock Widget -->
+        <div class="sc-widget" id="scRealTimeWidget">
+          <div class="sc-wdow" id="scRealTimeLabel" data-i18n="localTime">Clock</div>
+          <div class="sc-wdate" id="scRealTimeValue">00:00</div>
+        </div>
+        <!-- Extra Widget (e.g. Alarm or Pomodoro) -->
+        <div class="sc-widget" id="scExtraWidget">
+          <svg viewBox="0 0 24 24" class="sc-wicon"><circle cx="12" cy="13" r="9"/><polyline points="12 9 12 13 14.5 15.5"/><line x1="9.5" y1="2.5" x2="14.5" y2="2.5"/><line x1="12" y1="2.5" x2="12" y2="4"/></svg>
+          <div class="sc-wtext" id="scExtraInfo" data-i18n="pomodoro">Pomodoro</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Island View -->
+    <div id="islandClock" class="island-clock">
+      <span class="ic-digit" id="ic-h">00</span>
+      <span class="ic-sep">:</span>
+      <span class="ic-digit" id="ic-m">00</span>
+      <span class="ic-sep">:</span>
+      <span class="ic-digit" id="ic-s">00</span>
+      <button class="ic-restore-btn" id="btnExitIsland" title="Restore Full Mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
+    </div>
+
+
+    <!-- Pomodoro dots (hidden, floats over stage unobtrusively) -->
+
+    <div class="pom-dots" id="pomDots"></div>
+
+  </main>
+
+  <!-- Invisible hover zone to reveal bar -->
+  <div class="bar-trigger"></div>
+
+  <!-- ══ CONTROL BAR ══ -->
+  <footer class="bar" id="bar">
+
+    <!-- Mode tabs -->
+    <nav class="tabs" id="tabs" role="tablist">
+      <button class="tab active" data-mode="clock" id="tab-clock" role="tab">
+        <!-- Clock icon -->
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span data-i18n="clock">Clock</span>
+      </button>
+      <button class="tab" data-mode="pomodoro" id="tab-pomodoro" role="tab">
+        <!-- Timer icon -->
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="9"/><polyline points="12 9 12 13 14.5 15.5"/><line x1="9.5" y1="2.5" x2="14.5" y2="2.5"/><line x1="12" y1="2.5" x2="12" y2="4"/></svg>
+        <span data-i18n="pomodoro">Pomodoro</span>
+      </button>
+      <button class="tab" data-mode="counter" id="tab-counter" role="tab">
+        <!-- Hourglass icon -->
+        <svg viewBox="0 0 24 24"><path d="M6.5 2h11"/><path d="M6.5 22h11"/><path d="M6.5 2C6.5 2 7 8 12 12S17.5 22 17.5 22"/><path d="M17.5 2C17.5 2 17 8 12 12S6.5 22 6.5 22"/></svg>
+        <span data-i18n="counter">Counter</span>
+      </button>
+    </nav>
+
+    <!-- Playback -->
+    <div class="playback" id="playback">
+      <button class="ctrl-btn" id="btnReset" title="Reset (R)" aria-label="Reset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+      </button>
+      <button class="ctrl-btn ctrl-primary" id="btnPlay" title="Play/Pause (Space)" aria-label="Play Pause">
+        <svg id="ico-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        <svg id="ico-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="ctrl-btn" id="btnSkip" title="Skip session" aria-label="Skip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5,4 15,12 5,20" fill="currentColor" stroke="none"/>
+          <line x1="19" y1="5" x2="19" y2="19"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Right controls -->
+    <div class="right-ctrl">
+      <button class="ctrl-btn" id="btn12h" title="Toggle 12/24h" aria-label="Toggle time format">
+        <span id="lbl12h">12h</span>
+      </button>
+      <button class="ctrl-btn" id="btnIsland" title="Dynamic Island (I)" aria-label="Dynamic Island">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="7"/>
+          <circle cx="12" cy="12" r="3" fill="currentColor"/>
+        </svg>
+      </button>
+      <button class="ctrl-btn" id="btnFs" title="Fullscreen (F)" aria-label="Fullscreen">
+        <svg id="ico-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        </svg>
+        <svg id="ico-compress" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+        </svg>
+      </button>
+      <button class="ctrl-btn" id="btnSettings" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ══ COUNTER SETUP ══ -->
+  <div class="overlay" id="counterOverlay" role="dialog" aria-label="Counter setup">
+    <div class="panel">
+      <p class="panel-title" data-i18n="setTimer">Set Timer</p>
+      <div class="time-inputs">
+        <div class="ti-group">
+          <input type="number" id="inpH" min="0" max="99" value="0" class="ti" />
+          <label data-i18n="hh">HH</label>
+        </div>
+        <span class="ti-sep">:</span>
+        <div class="ti-group">
+          <input type="number" id="inpM" min="0" max="59" value="5" class="ti" />
+          <label data-i18n="mm">MM</label>
+        </div>
+        <span class="ti-sep">:</span>
+        <div class="ti-group">
+          <input type="number" id="inpS" min="0" max="59" value="0" class="ti" />
+          <label data-i18n="ss">SS</label>
+        </div>
+      </div>
+      <div class="dir-row">
+        <label class="radio-opt"><input type="radio" name="dir" value="down" id="dirDown" checked /><span data-i18n="countDown">Count Down</span></label>
+        <label class="radio-opt"><input type="radio" name="dir" value="up"   id="dirUp"   /><span data-i18n="countUp">Count Up</span></label>
+      </div>
+      <button class="btn-action" id="btnStartCounter" data-i18n="start">Start</button>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS MODAL ══ -->
+  <div class="overlay" id="settingsOverlay" role="dialog" aria-labelledby="settingsH">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="settingsH" data-i18n="settings">Settings</h2>
+        <button class="modal-close" id="btnCloseSettings" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Pomodoro -->
+        <section class="s-section">
+          <h3 class="s-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="9"/><polyline points="12 9 12 13 14.5 15.5"/><line x1="9.5" y1="2.5" x2="14.5" y2="2.5"/></svg>
+            <span data-i18n="pomodoro">Pomodoro</span>
+          </h3>
+          <div class="s-row"><label for="swm" data-i18n="workMin">Work (min)</label><input type="number" id="swm" class="s-input" min="1" max="120" value="25" /></div>
+          <div class="s-row"><label for="ssb" data-i18n="shortBreak">Short Break (min)</label><input type="number" id="ssb" class="s-input" min="1" max="60" value="5" /></div>
+          <div class="s-row"><label for="slb" data-i18n="longBreak">Long Break (min)</label><input type="number" id="slb" class="s-input" min="1" max="60" value="15" /></div>
+          <div class="s-row"><label for="sns" data-i18n="sessions">Sessions before Long Break</label><input type="number" id="sns" class="s-input" min="1" max="10" value="4" /></div>
+          <div class="s-row"><label for="sas" data-i18n="autoStart">Auto-start next</label><label class="toggle"><input type="checkbox" id="sas" /><span class="ttrack"></span></label></div>
+        </section>
+        <!-- Sound -->
+        <section class="s-section">
+          <h3 class="s-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            <span data-i18n="sound">Sound</span>
+          </h3>
+          <div class="s-row"><label for="ssnd" data-i18n="enableSound">Enable sound</label><label class="toggle"><input type="checkbox" id="ssnd" checked /><span class="ttrack"></span></label></div>
+          <div class="s-row"><label for="svol" data-i18n="volume">Volume</label><input type="range" id="svol" min="0" max="100" value="70" class="s-range" /></div>
+        </section>
+        
+        <!-- Language -->
+        <section class="s-section">
+          <h3 class="s-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span data-i18n="language">Language</span>
+          </h3>
+          <div class="s-row">
+            <label for="sMenuLang" data-i18n="menuLang">Menu Language</label>
+            <select id="sMenuLang" class="s-select">
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+            </select>
+          </div>
+          <div class="s-row">
+            <label for="sClockLang" data-i18n="clockLang">Clock Numbers</label>
+            <select id="sClockLang" class="s-select">
+              <option value="en">123</option>
+              <option value="ar">١٢٣</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Clock Appearance -->
+        <section class="s-section">
+          <h3 class="s-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span data-i18n="clockAppearance">Clock Settings</span>
+          </h3>
+          <div class="s-row">
+            <label for="sClockFont" data-i18n="clockFont">Clock Font</label>
+            <select id="sClockFont" class="s-select">
+              <option value="PingAR-Lt-Black">PingAR-Lt-Black (Default)</option>
+            </select>
+          </div>
+          <div class="s-row">
+            <label data-i18n="fontFolder">Fonts Folder</label>
+            <button class="btn-action btn-sm" id="btnOpenFontFolder" data-i18n="openFolder">Open Folder</button>
+          </div>
+          <div class="s-hint" id="fontHint" data-i18n="fontHint">Drop .ttf/.otf/.woff/.woff2 files into the fonts folder</div>
+          <div class="s-row">
+            <label for="sClockSep" data-i18n="clockSep">Separator</label>
+            <select id="sClockSep" class="s-select">
+              <option value=":">Colon (:)</option>
+              <option value=".">Dot (.)</option>
+              <option value="|">Bar (|)</option>
+              <option value="-">Dash (-)</option>
+              <option value="">Space ( )</option>
+            </select>
+          </div>
+          <div class="s-row"><label for="sShowWidget" data-i18n="showWidget">Show Side Widget</label><label class="toggle"><input type="checkbox" id="sShowWidget" checked /><span class="ttrack"></span></label></div>
+          <div class="s-row">
+            <label for="sClockSize" data-i18n="clockSize">Clock Size</label>
+            <input type="range" id="sClockSize" min="50" max="400" value="200" class="s-range" />
+          </div>
+          <div class="s-row">
+            <label for="sClockSpace" data-i18n="clockSpace">Number Spacing</label>
+            <input type="range" id="sClockSpace" min="-20" max="50" value="0" class="s-range" />
+          </div>
+        </section>
+        <!-- Display -->
+        <section class="s-section">
+          <h3 class="s-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span data-i18n="display">Display</span>
+          </h3>
+          <div class="s-row"><label for="ssec" data-i18n="showSec">Show seconds</label><label class="toggle"><input type="checkbox" id="ssec" checked /><span class="ttrack"></span></label></div>
+          <div class="s-row"><label for="sambient" data-i18n="showAmbient">Ambient Background</label><label class="toggle"><input type="checkbox" id="sambient" checked /><span class="ttrack"></span></label></div>
+          <div class="s-row"><label for="sglowOn" data-i18n="showGlow">Number Glow</label><label class="toggle"><input type="checkbox" id="sglowOn" checked /><span class="ttrack"></span></label></div>
+          <div class="s-row"><label for="sBgColor" data-i18n="bgColor">Background color</label><input type="color" id="sBgColor" value="#0a0a0c" class="s-color" /></div>
+          <div class="s-row"><label for="sAmbColor" data-i18n="ambColor">Ambient color</label><input type="color" id="sAmbColor" value="#e74c3c" class="s-color" /></div>
+          <div class="s-row"><label for="sNumColor" data-i18n="numColor">Numbers color</label><input type="color" id="sNumColor" value="#e74c3c" class="s-color" /></div>
+          <div class="s-row"><label for="sGlowColor" data-i18n="glowColor">Glow color</label><input type="color" id="sGlowColor" value="#e74c3c" class="s-color" /></div>
+          <div class="s-row"><label for="sacc" data-i18n="accentColor">Accent color</label><input type="color" id="sacc" value="#e74c3c" class="s-color" /></div>
+        </section>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-action" id="btnSave" data-i18n="save">Save</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+<script src="app.js"></script>
+</body>
+</html>

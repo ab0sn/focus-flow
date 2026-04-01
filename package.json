@@ -1,0 +1,69 @@
+{
+  "name": "focusflow",
+  "productName": "FocusFlow",
+  "version": "1.0.0",
+  "description": "Premium iOS-style StandBy clock with Pomodoro timer, tasks, and SoundCloud music player",
+  "author": "abusn",
+  "license": "ISC",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder --win",
+    "build:dir": "electron-builder --win --dir",
+    "pack": "electron-builder --dir",
+    "make-icon": "node make-icon.mjs"
+  },
+  "build": {
+    "appId": "com.focusflow.app",
+    "productName": "FocusFlow",
+    "copyright": "Copyright © 2025 abusn",
+    "asar": true,
+    "files": [
+      "**/*",
+      "!node_modules/**",
+      "!docs/**",
+      "!*.bat",
+      "!*.vbs",
+      "!*.md",
+      "!.gitignore"
+    ],
+    "extraResources": [
+      {
+        "from": "fonts/",
+        "to": "fonts/"
+      },
+      {
+        "from": "assets/",
+        "to": "assets/"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "FocusFlow"
+    },
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.1"
+  }
+}
