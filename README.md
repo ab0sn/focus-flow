@@ -418,30 +418,6 @@ index.html (App UI)
         ├── RTL Support
         └── Responsive Design
 ```
-
----
-
-## Screenshot Checklist
-
-Add the following images to `docs/screenshots/`:
-
-| Filename | Description |
-|----------|-------------|
-| `clock-mode.png` | Main screen — Clock mode |
-| `pomodoro.png` | Pomodoro timer during work |
-| `tasks-panel.png` | Tasks panel open |
-| `music-player.png` | Music player open with track list |
-| `settings.png` | Settings window |
-| `dynamic-island.png` | Dynamic Island mode |
-| `counter-setup.png` | Counter setup dialog |
-| `clock-detail.png` | Clock mode close-up |
-| `pomodoro-detail.png` | Pomodoro progress dots |
-| `counter-detail.png` | Counter during countdown |
-| `island-detail.png` | Dynamic Island close-up |
-| `settings-full.png` | Full settings with all sections |
-| `tasks-with-items.png` | Tasks panel with added items |
-| `music-tracks.png` | Music player with tracks |
-
 ---
 
 ## License
