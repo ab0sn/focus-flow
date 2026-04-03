@@ -201,8 +201,6 @@ Contents:
 
 The default mode — displays a large iOS-style StandBy clock.
 
-<!-- Place your screenshot here: Clock mode detail -->
-![Clock Mode Detail](docs/screenshots/clock-detail.png)
 
 Components:
 - Large digital clock (HH:MM or HH:MM:SS)
@@ -219,9 +217,6 @@ Full Pomodoro technique timer:
 - Auto-start next session option
 - Progress dots at the bottom
 
-<!-- Place your screenshot here: Pomodoro detail -->
-![Pomodoro Detail](docs/screenshots/pomodoro-detail.png)
-
 ### 3. Counter Mode
 
 Countdown or count up timer:
@@ -229,19 +224,12 @@ Countdown or count up timer:
 - Choose direction (countdown / count up)
 - Audio chime on completion
 
-<!-- Place your screenshot here: Counter detail -->
-![Counter Detail](docs/screenshots/counter-detail.png)
-
 ### 4. Dynamic Island Mode
 
 A mini floating clock bar at the top of the screen:
 - Shows HH:MM:SS in a compact pill
 - Always on top
 - Double-click to restore full mode
-
-<!-- Place your screenshot here: Dynamic Island detail -->
-![Dynamic Island Detail](docs/screenshots/island-detail.png)
-
 ---
 
 ## Settings
@@ -289,10 +277,6 @@ A mini floating clock bar at the top of the screen:
 | Numbers color | #e74c3c | Clock digit color |
 | Glow color | #e74c3c | Glow effect around digits |
 | Accent color | #e74c3c | Primary UI color (buttons, progress) |
-
-<!-- Place your screenshot here: Full settings view -->
-![Settings Full](docs/screenshots/settings-full.png)
-
 ---
 
 ## Tasks
@@ -311,10 +295,6 @@ A mini floating clock bar at the top of the screen:
 - Delete: Hover over the task and click the X button
 - Clear completed: Click the trash icon in the panel header
 - Notifications: Automatic alerts at start and end times
-
-<!-- Place your screenshot here: Tasks panel with items -->
-![Tasks with Items](docs/screenshots/tasks-with-items.png)
-
 ---
 
 ## Music Player
@@ -331,10 +311,6 @@ A mini floating clock bar at the top of the screen:
 - Loop: Repeat button (turns accent color when active)
 - Progress bar: Click to seek
 - Volume: Slider at the bottom
-
-<!-- Place your screenshot here: Music player with tracks -->
-![Music Player with Tracks](docs/screenshots/music-tracks.png)
-
 ---
 
 ## Language Support
